@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY - Resu-OS XP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pixel Font for that Retro Feel -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --xp-blue: #245DDA;
+            --xp-bar-blue: #245DDA;
+            --xp-green: #3C8D0D;
+            --win-gray: #ECE9D8;
+            --title-gradient-start: #0058EE;
+            --title-gradient-end: #0054E3;
+        }
+
+        body {
+            font-family: 'Tahoma', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; /* Bliss-like wallpaper */
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+        }
+
+        /* Desktop Icons */
+        .desktop-icons {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            height: 90vh;
+            padding: 10px;
+            gap: 20px;
+            align-content: flex-start;
+        }
+
+        .icon {
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            transition: all 0.1s;
+        }
+
+        .icon:hover {
+            background-color: rgba(0, 120, 215, 0.3);
+            border: 1px dotted rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+
+        .icon i {
+            font-size: 32px;
+            margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3));
+        }
+
+        .icon-label {
+            font-size: 12px;
+            line-height: 1.2;
+            padding: 2px;
+        }
+
+        /* Window Styles */
+        .window {
+            position: absolute;
+            background-color: var(--win-gray);
+            border: 1px solid #0055EA;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            min-height: 200px;
+            overflow: hidden;
+            /* Default hidden */
+            visibility: hidden; 
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.1s, transform 0.1s, width 0.2s, height 0.2s;
+        }
+
+        .window.open {
+            visibility: visible;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh - 40px) !important;
+            border-radius: 0;
+        }
+
+        .title-bar {
+            height: 30px;
+            background: linear-gradient(180deg, #2989d8 0%, #1e5799 3%, #2989d8 6%, #207cca 10%, #7db9e8 100%);
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px 1px black;
+            border-radius: 6px 6px 0 0;
+            cursor: default;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .win-btn {
+            width: 20px;
+            height: 20px;
+            border: 1px solid white;
+            border-radius: 3px;
+            background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+
+        .win-btn:hover { filter: brightness(1.1); }
+        .win-btn.close-btn { background: #d84838; color: white; border-color: #8e1c1c; }
+
+        .window-content {
+            flex: 1;
+            padding: 2px;
+            background: var(--win-gray);
+            overflow: auto;
+            position: relative;
+        }
+
+        .inner-white-bg {
+            background: white;
+            height: 100%;
+            border: 1px solid #999;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+        }
+
+        /* Taskbar */
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(180deg, #245DDA 0%, #1941A5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            border-top: 2px solid #4F82EB;
+        }
+
+        #start-btn {
+            height: 100%;
+            width: 100px;
+            background: linear-gradient(180deg, #3C8D0D 0%, #255509 100%);
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+            padding-right: 10px;
+        }
+        
+        #start-btn i {
+            background: white;
+            border-radius: 50%;
+            color: #E54118;
+            padding: 2px;
+            margin-right: 5px;
+            font-style: normal;
+            font-size: 14px;
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .taskbar-items {
+            flex: 1;
+            display: flex;
+            padding-left: 10px;
+            gap: 5px;
+            overflow-x: auto;
+        }
+
+        .task-item {
+            background: #3A6EA5;
+            width: 160px;
+            height: 30px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .task-item:hover { background: #4a8cd1; }
+        .task-item.active { background: #1e4a7e; box-shadow: inset 1px 1px 3px black; }
+
+        .tray {
+            background: #0F72C8;
+            height: 100%;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            border-left: 1px solid #122852;
+            box-shadow: inset 1px 0 2px rgba(0,0,0,0.3);
+        }
+
+        /* Start Menu */
+        #start-menu {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 250px;
+            background: white;
+            border: 1px solid #0046AD;
+            border-top-right-radius: 8px;
+            border-top-left-radius: 8px;
+            display: none; /* toggled */
+            box-shadow: 2px -2px 10px rgba(0,0,0,0.4);
+            z-index: 9999;
+            flex-direction: column;
+        }
+        
+        .start-header {
+            background: #245DDA;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            border-top-right-radius: 8px;
+            border-top-left-radius: 8px;
+            gap: 10px;
+        }
+        .start-avatar { width: 40px; height: 40px; background: white; border-radius: 4px; border: 2px solid orange; overflow: hidden;}
+
+        .start-body {
+            display: flex;
+        }
+        .start-col { padding: 5px; display: flex; flex-direction: column; gap: 2px; }
+        .start-col-left { background: white; flex: 1; border-right: 1px solid #ddd;}
+        .start-col-right { background: #D3E5FA; flex: 1; }
+
+        .start-item {
+            padding: 6px;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .start-item:hover { background: #2F71CD; color: white; }
+        .start-item i { width: 20px; text-align: center;}
+        
+        .start-footer {
+            background: #245DDA;
+            padding: 8px;
+            display: flex;
+            justify-content: flex-end;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* Content Specifics */
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+        .file-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .file-item:hover { background: #e6f2ff; border: 1px solid #cce6ff; border-radius: 4px;}
+        .file-icon { font-size: 32px; margin-bottom: 4px; }
+        .file-name { font-size: 12px; word-break: break-word; }
+
+        .notepad-font { font-family: 'Courier New', Courier, monospace; }
+        
+        /* Progress Bars for Skills */
+        .skill-row { margin-bottom: 10px; }
+        .skill-label { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between;}
+        .progress-container {
+            background: #e0e0e0;
+            border: 1px solid #999;
+            height: 15px;
+            margin-top: 2px;
+            position: relative;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #3C8D0D, #5cb85c);
+            height: 100%;
+            width: 0%; /* JS animates this */
+            transition: width 1s ease-out;
+        }
+        .progress-blocks {
+            position: absolute; top:0; left:0; width: 100%; height: 100%;
+            background-image: linear-gradient(90deg, transparent 90%, white 90%);
+            background-size: 10px 100%;
+            opacity: 0.5;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Desktop Icons -->
+    <div class="desktop-icons">
+        <div class="icon" ondblclick="openWindow('about')">
+            <i class="fas fa-user-circle" style="color: #4da6ff;"></i>
+            <div class="icon-label">My Profile</div>
+        </div>
+        <div class="icon" ondblclick="openWindow('experience')">
+            <i class="fas fa-folder-open" style="color: #ffcc00;"></i>
+            <div class="icon-label">Experience</div>
+        </div>
+        <div class="icon" ondblclick="openWindow('skills')">
+            <i class="fas fa-cogs" style="color: #a0a0a0;"></i>
+            <div class="icon-label">Skills_Mgr</div>
+        </div>
+        <div class="icon" ondblclick="openWindow('projects')">
+            <i class="fas fa-file-code" style="color: #4da6ff;"></i>
+            <div class="icon-label">Projects.txt</div>
+        </div>
+        <div class="icon" ondblclick="openWindow('contact')">
+            <i class="fas fa-envelope-open-text" style="color: #ffaa00;"></i>
+            <div class="icon-label">Contact Me</div>
+        </div>
+        <div class="icon" onclick="alert('Just a decoration!')">
+            <i class="fas fa-trash-alt" style="color: #dcdcdc;"></i>
+            <div class="icon-label">Recycle Bin</div>
+        </div>
+    </div>
+
+    <!-- Windows Container -->
+    <div id="windows-area">
+        <!-- 1. About Me Window -->
+        <div id="about" class="window" style="top: 50px; left: 50px; width: 450px; height: 400px;">
+            <div class="title-bar" onmousedown="startDrag(event, 'about')">
+                <div class="flex items-center gap-2"><i class="fas fa-user-circle"></i> My Profile</div>
+                <div class="window-controls">
+                    <div class="win-btn" onclick="minimizeWindow('about')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('about')">□</div>
+                    <div class="win-btn close-btn" onclick="closeWindow('about')">X</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="inner-white-bg p-6">
+                    <div class="flex gap-4 mb-4">
+                        <div class="w-24 h-24 bg-gray-300 border-2 border-gray-400 flex items-center justify-center">
+                            <i class="fas fa-user text-4xl text-gray-500"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-blue-700">John Doe</h2>
+                            <p class="text-gray-600">Full Stack Developer</p>
+                            <p class="text-sm mt-2">Location: San Francisco, CA</p>
+                            <p class="text-sm">Level: 25 (Age)</p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-300 my-4">
+                    <h3 class="font-bold mb-2">System Summary</h3>
+                    <p class="mb-2">Creative developer with a passion for building nostalgic interfaces and robust backend systems. Operates at peak efficiency with coffee.</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1">
+                        <li>Architecture: Clean Code</li>
+                        <li>OS: Caffeine 2.0</li>
+                        <li>Availability: High</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Experience Window (Folder View) -->
+        <div id="experience" class="window" style="top: 80px; left: 100px; width: 500px; height: 350px;">
+            <div class="title-bar" onmousedown="startDrag(event, 'experience')">
+                <div class="flex items-center gap-2"><i class="fas fa-folder-open"></i> C:\Experience</div>
+                <div class="window-controls">
+                    <div class="win-btn" onclick="minimizeWindow('experience')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('experience')">□</div>
+                    <div class="win-btn close-btn" onclick="closeWindow('experience')">X</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="bg-white border-b border-gray-300 p-1 text-sm flex gap-2 mb-1">
+                    <span class="text-gray-500">Address:</span>
+                    <div class="border border-gray-300 flex-1 bg-white px-1">C:\Resume\Work_History</div>
+                    <div class="bg-green-500 text-white px-2 rounded cursor-pointer">Go</div>
+                </div>
+                <div class="inner-white-bg">
+                    <div class="folder-grid">
+                        <div class="file-item" onclick="alert('Senior Dev @ TechCorp (2021-Present)\n- Led team of 5\n- React/Node Stack')">
+                            <i class="fas fa-file-word text-blue-600 file-icon"></i>
+                            <div class="file-name">TechCorp_2021.doc</div>
+                        </div>
+                        <div class="file-item" onclick="alert('Web Dev @ StartUp Inc (2019-2021)\n- Built main MVP\n- 200% user growth')">
+                            <i class="fas fa-file-word text-blue-600 file-icon"></i>
+                            <div class="file-name">StartUp_2019.doc</div>
+                        </div>
+                        <div class="file-item" onclick="alert('Intern @ BigData Co (2018)\n- Coffee fetching v1.0\n- SQL Queries')">
+                            <i class="fas fa-file-text text-gray-500 file-icon"></i>
+                            <div class="file-name">Internship.txt</div>
+                        </div>
+                    </div>
+                    <div class="mt-8 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                        <i class="fas fa-info-circle"></i> Tip: Click files to view details.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Skills Window (System Panel) -->
+        <div id="skills" class="window" style="top: 110px; left: 150px; width: 350px; height: 400px;">
+            <div class="title-bar" onmousedown="startDrag(event, 'skills')">
+                <div class="flex items-center gap-2"><i class="fas fa-cogs"></i> Skills Manager</div>
+                <div class="window-controls">
+                    <div class="win-btn" onclick="minimizeWindow('skills')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('skills')">□</div>
+                    <div class="win-btn close-btn" onclick="closeWindow('skills')">X</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="inner-white-bg">
+                    <div class="flex items-center gap-4 mb-4 border-b pb-2">
+                        <i class="fas fa-microchip text-3xl text-green-600"></i>
+                        <div>
+                            <h3 class="font-bold">Technical Specs</h3>
+                            <span class="text-xs text-gray-500">System Performance</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-row">
+                        <div class="skill-label"><span>JavaScript / React</span> <span>90%</span></div>
+                        <div class="progress-container"><div class="progress-bar" style="width: 90%;"></div><div class="progress-blocks"></div></div>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-label"><span>Python / Django</span> <span>85%</span></div>
+                        <div class="progress-container"><div class="progress-bar" style="width: 85%;"></div><div class="progress-blocks"></div></div>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-label"><span>CSS / Tailwind</span> <span>95%</span></div>
+                        <div class="progress-container"><div class="progress-bar" style="width: 95%;"></div><div class="progress-blocks"></div></div>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-label"><span>SQL / Database</span> <span>75%</span></div>
+                        <div class="progress-container"><div class="progress-bar" style="width: 75%;"></div><div class="progress-blocks"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Projects (Notepad) -->
+        <div id="projects" class="window" style="top: 40px; left: 300px; width: 400px; height: 300px;">
+            <div class="title-bar" onmousedown="startDrag(event, 'projects')">
+                <div class="flex items-center gap-2"><i class="fas fa-file-alt"></i> Projects.txt - Notepad</div>
+                <div class="window-controls">
+                    <div class="win-btn" onclick="minimizeWindow('projects')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('projects')">□</div>
+                    <div class="win-btn close-btn" onclick="closeWindow('projects')">X</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="bg-white text-sm border-b p-1">File &nbsp; Edit &nbsp; Format &nbsp; View &nbsp; Help</div>
+                <div class="inner-white-bg notepad-font border-none">
+                    PROJECT_LOG_2025.txt
+                    --------------------
+                    
+                    1. [E-Commerce Platform]
+                       Status: COMPLETED
+                       Tech: React, Node, Stripe
+                       Link: www.shop-demo.com
+                    
+                    2. [AI Chat Bot]
+                       Status: IN PROGRESS
+                       Tech: Python, OpenAI API
+                       Notes: Need to fix memory leak in module 4.
+                    
+                    3. [Retro Resume OS]
+                       Status: DEPLOYED
+                       Tech: HTML, CSS, JS
+                       Notes: It looks like Windows XP!
+                    
+                    _
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Contact (Outlook Express style) -->
+        <div id="contact" class="window" style="top: 150px; left: 200px; width: 400px; height: 350px;">
+            <div class="title-bar" onmousedown="startDrag(event, 'contact')">
+                <div class="flex items-center gap-2"><i class="fas fa-envelope"></i> Contact - Message</div>
+                <div class="window-controls">
+                    <div class="win-btn" onclick="minimizeWindow('contact')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('contact')">□</div>
+                    <div class="win-btn close-btn" onclick="closeWindow('contact')">X</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="bg-gray-100 p-2 border-b border-gray-300 text-sm">
+                    <div class="flex mb-1"><span class="w-12 text-gray-500">To:</span> <strong>John Doe</strong></div>
+                    <div class="flex mb-1"><span class="w-12 text-gray-500">From:</span> <input type="text" placeholder="Your Email" class="border px-1 flex-1"></div>
+                    <div class="flex"><span class="w-12 text-gray-500">Subject:</span> <input type="text" value="Job Opportunity" class="border px-1 flex-1"></div>
+                </div>
+                <div class="inner-white-bg border-none">
+                    <textarea class="w-full h-full resize-none outline-none" placeholder="Type your message here..."></textarea>
+                </div>
+                <div class="bg-gray-100 p-2 border-t border-gray-300 flex justify-end">
+                    <button class="px-4 py-1 bg-white border border-gray-400 shadow-sm text-sm active:bg-gray-200" onclick="alert('Message Sent! (Simulation)')">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu">
+        <div class="start-header">
+            <div class="start-avatar"><img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=John" alt="Avatar"></div>
+            <span>Administrator</span>
+        </div>
+        <div class="start-body">
+            <div class="start-col start-col-left">
+                <div class="start-item" onclick="openWindow('about')"><i class="fas fa-user text-blue-600"></i> My Profile</div>
+                <div class="start-item" onclick="openWindow('contact')"><i class="fas fa-envelope text-blue-600"></i> E-mail</div>
+                <div class="h-px bg-gray-300 my-1"></div>
+                <div class="start-item" onclick="openWindow('projects')"><i class="fas fa-book text-gray-600"></i> Projects</div>
+                <div class="start-item" onclick="openWindow('experience')"><i class="fas fa-briefcase text-gray-600"></i> Work</div>
+            </div>
+            <div class="start-col start-col-right">
+                <div class="start-item font-bold text-blue-900"><i class="fas fa-folder"></i> My Documents</div>
+                <div class="start-item font-bold text-blue-900"><i class="fas fa-images"></i> My Pictures</div>
+                <div class="h-px bg-blue-200 my-1"></div>
+                <div class="start-item" onclick="openWindow('skills')"><i class="fas fa-cogs"></i> Control Panel</div>
+                <div class="start-item"><i class="fas fa-print"></i> Printers</div>
+            </div>
+        </div>
+        <div class="start-footer">
+            <div class="cursor-pointer flex items-center gap-2 hover:text-gray-300" onclick="window.location.reload()"><i class="fas fa-power-off text-orange-400"></i> Log Off</div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+        <div id="start-btn" onclick="toggleStartMenu()">
+            <i class="fab fa-windows"></i> Start
+        </div>
+        <div class="taskbar-items" id="taskbar-list">
+            <!-- Active windows populated here via JS -->
+        </div>
+        <div class="tray">
+            <i class="fas fa-volume-up mr-3"></i>
+            <i class="fas fa-wifi mr-3"></i>
+            <span id="clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let zIndexCounter = 10;
+        const openWindows = new Set();
+
+        // --- Window Functions ---
+        function openWindow(id) {
+            const win = document.getElementById(id);
+            const taskbarList = document.getElementById('taskbar-list');
+
+            // Bring to front
+            zIndexCounter++;
+            win.style.zIndex = zIndexCounter;
+
+            // Show window
+            win.classList.add('open');
+            win.classList.remove('minimized');
+
+            // Add to taskbar if not already there
+            if (!openWindows.has(id)) {
+                openWindows.add(id);
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item active';
+                taskItem.id = `task-${id}`;
+                
+                // Get icon and title based on ID
+                let iconClass = 'fa-window-maximize';
+                if(id === 'about') iconClass = 'fa-user-circle';
+                if(id === 'experience') iconClass = 'fa-folder-open';
+                if(id === 'skills') iconClass = 'fa-cogs';
+                if(id === 'projects') iconClass = 'fa-file-alt';
+                if(id === 'contact') iconClass = 'fa-envelope';
+
+                taskItem.innerHTML = `<i class="fas ${iconClass} mr-2"></i> ${id.charAt(0).toUpperCase() + id.slice(1)}`;
+                taskItem.onclick = () => toggleWindow(id);
+                taskbarList.appendChild(taskItem);
+            }
+
+            // Close start menu if open
+            document.getElementById('start-menu').style.display = 'none';
+        }
+
+        function closeWindow(id) {
+            const win = document.getElementById(id);
+            win.classList.remove('open');
+            
+            // Remove from taskbar
+            openWindows.delete(id);
+            const taskItem = document.getElementById(`task-${id}`);
+            if(taskItem) taskItem.remove();
+        }
+
+        function minimizeWindow(id) {
+            const win = document.getElementById(id);
+            win.classList.remove('open');
+            // Keep in taskbar, remove active class
+            const taskItem = document.getElementById(`task-${id}`);
+            if(taskItem) taskItem.classList.remove('active');
+        }
+
+        function maximizeWindow(id) {
+            const win = document.getElementById(id);
+            win.classList.toggle('maximized');
+        }
+
+        function toggleWindow(id) {
+            const win = document.getElementById(id);
+            const taskItem = document.getElementById(`task-${id}`);
+
+            if (win.classList.contains('open') && win.style.zIndex == zIndexCounter) {
+                // If active and top, minimize
+                minimizeWindow(id);
+            } else {
+                // Else open and bring to front
+                openWindow(id);
+                // Highlight taskbar
+                document.querySelectorAll('.task-item').forEach(el => el.classList.remove('active'));
+                taskItem.classList.add('active');
+            }
+        }
+
+        // --- Drag Logic ---
+        let isDragging = false;
+        let currentWindow = null;
+        let offset = { x: 0, y: 0 };
+
+        function startDrag(e, id) {
+            // Only drag if not maximized
+            const win = document.getElementById(id);
+            if(win.classList.contains('maximized')) return;
+
+            isDragging = true;
+            currentWindow = win;
+            
+            // Bring to front on click
+            zIndexCounter++;
+            win.style.zIndex = zIndexCounter;
+            
+            // Highlight taskbar
+            document.querySelectorAll('.task-item').forEach(el => el.classList.remove('active'));
+            const taskItem = document.getElementById(`task-${id}`);
+            if(taskItem) taskItem.classList.add('active');
+
+            // Calculate offset
+            const rect = win.getBoundingClientRect();
+            if (e.type === 'touchstart') {
+                 offset.x = e.touches[0].clientX - rect.left;
+                 offset.y = e.touches[0].clientY - rect.top;
+            } else {
+                offset.x = e.clientX - rect.left;
+                offset.y = e.clientY - rect.top;
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging || !currentWindow) return;
+            e.preventDefault();
+
+            let clientX, clientY;
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            currentWindow.style.left = (clientX - offset.x) + 'px';
+            currentWindow.style.top = (clientY - offset.y) + 'px';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            currentWindow = null;
+        }
+
+        // Global Event Listeners for Drag
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+
+        // --- Start Menu & Clock ---
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            if (menu.style.display === 'flex') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'flex';
+                // Close if clicked outside (handled by simple logic here)
+            }
+        }
+
+        // Close start menu when clicking on desktop
+        document.querySelector('.desktop-icons').addEventListener('click', (e) => {
+            if(e.target.classList.contains('desktop-icons')) {
+                document.getElementById('start-menu').style.display = 'none';
+            }
+        });
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            document.getElementById('clock').innerText = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Init ---
+        // Open 'About Me' on load for better UX
+        setTimeout(() => {
+            openWindow('about');
+        }, 500);
+
+    </script>
+</body>
+</html>
